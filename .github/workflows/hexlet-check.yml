@@ -19,12 +19,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4 # Или @v3 как в примере
+        uses: actions/setup-go@v4
         with:
-          go-version: "1.19" # Версия из примера
+          go-version: "1.25.0"
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@latest
         with:
           version: latest
 
