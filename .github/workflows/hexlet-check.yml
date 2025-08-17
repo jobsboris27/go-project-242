@@ -8,15 +8,25 @@ name: hexlet-check
 on:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '**'
+      - "**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4 # Или @v3 как в примере
+        with:
+          go-version: "1.19" # Версия из примера
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
 
       - name: Hexlet project check
         uses: hexlet/project-action@release
