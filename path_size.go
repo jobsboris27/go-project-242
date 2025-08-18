@@ -1,37 +1,42 @@
 package pathsize
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/urfave/cli/v3"
 )
 
-func Run() {
-	cmd := &cli.Command{
-		UseShortOptionHandling: true,
-		Commands: []*cli.Command{
-			{
-				Name:  "short",
-				Usage: "complete a task on the list",
-				Flags: []cli.Flag{
-					&cli.BoolFlag{Name: "serve", Aliases: []string{"s"}},
-					&cli.BoolFlag{Name: "option", Aliases: []string{"o"}},
-					&cli.StringFlag{Name: "message", Aliases: []string{"m"}},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					fmt.Println("serve:", cmd.Bool("serve"))
-					fmt.Println("option:", cmd.Bool("option"))
-					fmt.Println("message:", cmd.String("message"))
-					return nil
-				},
-			},
-		},
-	}
+func GetSize(path string) (string, error) {
+	info, err := os.Lstat(path)
 
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
+	if err != nil {
 		log.Fatal(err)
 	}
+
+	if info.IsDir() {
+		return fmt.Sprintf("%d\t%s\n", calculateDirSize(path), path), nil
+	} else {
+		return fmt.Sprintf("%d\t%s\n", info.Size(), path), nil
+	}
+}
+
+func calculateDirSize(path string) int64 {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return 0
+	}
+	var size int64
+
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			continue
+		}
+
+		if !entry.IsDir() {
+			size += info.Size()
+		}
+	}
+
+	return size
 }
