@@ -1,22 +1,20 @@
 package pathsize
 
 import (
-	"fmt"
-	"log"
 	"os"
 )
 
-func GetSize(path string) (string, error) {
+func GetSize(path string) (int64, error) {
 	info, err := os.Lstat(path)
 
 	if err != nil {
-		log.Fatal(err)
+		return 0, nil
 	}
 
 	if info.IsDir() {
-		return fmt.Sprintf("%d\t%s\n", calculateDirSize(path), path), nil
+		return calculateDirSize(path), nil
 	} else {
-		return fmt.Sprintf("%d\t%s\n", info.Size(), path), nil
+		return info.Size(), nil
 	}
 }
 

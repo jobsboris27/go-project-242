@@ -22,13 +22,13 @@ func main() {
 				path = cmd.Args().First()
 			}
 
-			message, ok := pathsize.GetSize(path)
+			size, ok := pathsize.GetSize(path)
 
 			if ok != nil {
 				log.Fatal(ok)
 			}
 
-			fmt.Println(message)
+			fmt.Sprintf("%d\t%s\n", size, path)
 
 			return nil
 		},
