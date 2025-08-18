@@ -8,7 +8,7 @@ func GetSize(path string) (int64, error) {
 	info, err := os.Lstat(path)
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	if info.IsDir() {
