@@ -62,7 +62,12 @@ func createFileWithSize(t *testing.T, path string, size int64) {
 	if err != nil {
 		t.Fatalf("Failed to create file: %v", err)
 	}
-	defer file.Close()
+
+	defer func() {
+		if err := file.Close(); err != nil {
+			t.Errorf("Failed to close file: %v", err)
+		}
+	}()
 
 	if err := file.Truncate(size); err != nil {
 		t.Fatalf("Failed to set file size: %v", err)
