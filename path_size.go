@@ -1,6 +1,7 @@
 package pathsize
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -37,4 +38,29 @@ func calculateDirSize(path string) int64 {
 	}
 
 	return size
+}
+
+func FormatSize(size int64, human bool) string {
+	if human {
+		return getHumanSize(size)
+	} else {
+		return fmt.Sprintf("%dB", size)
+	}
+}
+
+func getHumanSize(size int64) string {
+	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
+	unitIndex := 0
+	floatSize := float64(size)
+
+	for floatSize >= 1024 && unitIndex < len(units)-1 {
+		floatSize /= 1024
+		unitIndex++
+	}
+
+	if unitIndex == 0 {
+		return fmt.Sprintf("%dB", size)
+	}
+
+	return fmt.Sprintf("%.1f%s", floatSize, units[unitIndex])
 }

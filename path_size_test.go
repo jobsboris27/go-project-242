@@ -9,6 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	KB = 1024
+	MB = KB * 1024
+	GB = MB * 1024
+	TB = GB * 1024
+)
+
 func TestGetSize_File(t *testing.T) {
 	tempDir := t.TempDir()
 	fileName := "testFile.txt"
@@ -46,13 +53,45 @@ func TestGetSize_NonExistentPath(t *testing.T) {
 	require.NotNil(t, err)
 }
 
-func TestCalculateDirSize_Empty(t *testing.T) {
+func TestGetSize_EmptyDir(t *testing.T) {
 	tempDir := t.TempDir()
 
 	size, err := pathsize.GetSize(tempDir)
 
 	require.NoError(t, err)
 	require.Equal(t, int64(0), size)
+}
+
+func TestFormatSize_Human(t *testing.T) {
+	sizes := []int64{100, 1024, 1048576, 1073741824, 1099511627776}
+	sizeNames := map[string]int64{
+		"100B":  100,
+		"1.0KB": KB,
+		"1.0MB": MB,
+		"1.0GB": GB,
+		"1.0TB": TB,
+	}
+
+	for _, size := range sizes {
+		message := pathsize.FormatSize(size, true)
+		require.Equal(t, size, sizeNames[message], "Size should match the expected value")
+	}
+}
+
+func TestFormatSize_NotHuman(t *testing.T) {
+	sizes := []int64{100, 1024, 1048576, 1073741824, 1099511627776}
+	sizeNames := map[string]int64{
+		"100B":           100,
+		"1024B":          KB,
+		"1048576B":       MB,
+		"1073741824B":    GB,
+		"1099511627776B": TB,
+	}
+
+	for _, size := range sizes {
+		message := pathsize.FormatSize(size, false)
+		require.Equal(t, size, sizeNames[message], "Size should match the expected value")
+	}
 }
 
 func createFileWithSize(t *testing.T, path string, size int64) {
