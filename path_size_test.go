@@ -10,10 +10,14 @@ import (
 )
 
 const (
-	KB = 1024
-	MB = KB * 1024
-	GB = MB * 1024
-	TB = GB * 1024
+	KB        = 1024
+	MB        = KB * 1024
+	GB        = MB * 1024
+	TB        = GB * 1024
+	sizeFile1 = 100
+	sizeFile2 = 200
+	sizeFile3 = 150
+	sizeFile4 = 50
 )
 
 func TestGetSize_File(t *testing.T) {
@@ -24,7 +28,7 @@ func TestGetSize_File(t *testing.T) {
 
 	createFileWithSize(t, filepath.Join(tempDir, fileName), targetSize)
 
-	size, err := pathsize.GetSize(filePath, false)
+	size, err := pathsize.GetSize(filePath, false, false)
 
 	require.Nil(t, err)
 	require.Equal(t, size, targetSize)
@@ -40,7 +44,7 @@ func TestGetSize_Directory(t *testing.T) {
 		createFileWithSize(t, filepath.Join(tempDir, file), targetSize)
 	}
 
-	size, err := pathsize.GetSize(tempDir, false)
+	size, err := pathsize.GetSize(tempDir, false, false)
 
 	require.NoError(t, err)
 	require.Equal(t, size, targetSize*int64(len(files)))
@@ -48,7 +52,7 @@ func TestGetSize_Directory(t *testing.T) {
 
 func TestGetSize_NonExistentPath(t *testing.T) {
 	filePath := "./non_existent_file.txt"
-	_, err := pathsize.GetSize(filePath, false)
+	_, err := pathsize.GetSize(filePath, false, false)
 
 	require.NotNil(t, err)
 }
@@ -56,7 +60,7 @@ func TestGetSize_NonExistentPath(t *testing.T) {
 func TestGetSize_EmptyDir(t *testing.T) {
 	tempDir := t.TempDir()
 
-	size, err := pathsize.GetSize(tempDir, false)
+	size, err := pathsize.GetSize(tempDir, false, false)
 
 	require.NoError(t, err)
 	require.Equal(t, int64(0), size)
@@ -101,7 +105,7 @@ func TestCalculateDirSize_WithHidden(t *testing.T) {
 		createFileWithSize(t, filepath.Join(tempDir, "visible.txt"), 100)
 		createFileWithSize(t, filepath.Join(tempDir, ".hidden"), 50)
 
-		size, _ := pathsize.GetSize(tempDir, false)
+		size, _ := pathsize.GetSize(tempDir, true, false)
 		require.Equal(t, int64(150), size)
 	})
 
@@ -111,7 +115,7 @@ func TestCalculateDirSize_WithHidden(t *testing.T) {
 		createFileWithSize(t, filepath.Join(tempDir, "visible.txt"), 100)
 		createFileWithSize(t, filepath.Join(tempDir, ".hidden"), 50)
 
-		size, _ := pathsize.GetSize(tempDir, true)
+		size, _ := pathsize.GetSize(tempDir, false, false)
 		require.Equal(t, int64(100), size)
 	})
 
@@ -121,8 +125,45 @@ func TestCalculateDirSize_WithHidden(t *testing.T) {
 		createFileWithSize(t, filepath.Join(tempDir, ".hidden1"), 30)
 		createFileWithSize(t, filepath.Join(tempDir, ".hidden2"), 40)
 
-		size, _ := pathsize.GetSize(tempDir, true)
-		require.Equal(t, int64(0), size)
+		size, _ := pathsize.GetSize(tempDir, true, false)
+		require.Equal(t, int64(70), size)
+	})
+}
+
+func TestCalculateDirSize_Recursive(t *testing.T) {
+	setupTestEnv := func(t *testing.T) string {
+		tempDir := t.TempDir()
+
+		createFileWithSize(t, filepath.Join(tempDir, "file1.txt"), sizeFile1)
+		createFileWithSize(t, filepath.Join(tempDir, "file2.txt"), sizeFile2)
+
+		subDir := filepath.Join(tempDir, "subdir")
+		require.NoError(t, os.Mkdir(subDir, 0755))
+		createFileWithSize(t, filepath.Join(subDir, "file3.txt"), sizeFile3)
+
+		nestedDir := filepath.Join(subDir, "nested")
+		require.NoError(t, os.Mkdir(nestedDir, 0755))
+		createFileWithSize(t, filepath.Join(nestedDir, "file4.txt"), sizeFile4)
+
+		return tempDir
+	}
+
+	t.Run("non-recursive counts only root files", func(t *testing.T) {
+		dir := setupTestEnv(t)
+		size, err := pathsize.GetSize(dir, true, false)
+		expected := int64(sizeFile1 + sizeFile2)
+
+		require.NoError(t, err)
+		require.Equal(t, expected, size)
+	})
+
+	t.Run("recursive counts all files", func(t *testing.T) {
+		dir := setupTestEnv(t)
+		size, err := pathsize.GetSize(dir, true, true)
+		expected := int64(sizeFile1 + sizeFile2 + sizeFile3 + sizeFile4)
+
+		require.NoError(t, err)
+		require.Equal(t, expected, size)
 	})
 }
 
