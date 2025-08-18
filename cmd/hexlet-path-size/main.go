@@ -21,6 +21,11 @@ func main() {
 				Aliases: []string{"H"},
 				Usage:   "human-readable sizes (auto-select unit)",
 			},
+			&cli.BoolFlag{
+				Name:    "all",
+				Aliases: []string{"a"},
+				Usage:   "include hidden files and directories",
+			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			if cmd.NArg() < 1 {
@@ -28,8 +33,9 @@ func main() {
 			}
 			path := cmd.Args().First()
 			humanReadable := cmd.Bool("human")
+			withHidden := cmd.Bool("all")
 
-			size, ok := pathsize.GetSize(path)
+			size, ok := pathsize.GetSize(path, withHidden)
 
 			if ok != nil {
 				log.Fatal(ok)

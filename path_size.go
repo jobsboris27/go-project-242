@@ -3,9 +3,10 @@ package pathsize
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
-func GetSize(path string) (int64, error) {
+func GetSize(path string, withHidden bool) (int64, error) {
 	info, err := os.Lstat(path)
 
 	if err != nil {
@@ -13,13 +14,13 @@ func GetSize(path string) (int64, error) {
 	}
 
 	if info.IsDir() {
-		return calculateDirSize(path), nil
+		return calculateDirSize(path, withHidden), nil
 	} else {
 		return info.Size(), nil
 	}
 }
 
-func calculateDirSize(path string) int64 {
+func calculateDirSize(path string, withHidden bool) int64 {
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return 0
@@ -28,6 +29,11 @@ func calculateDirSize(path string) int64 {
 
 	for _, entry := range entries {
 		info, err := entry.Info()
+
+		if withHidden && strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+
 		if err != nil {
 			continue
 		}
