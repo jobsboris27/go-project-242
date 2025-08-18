@@ -28,7 +28,7 @@ func main() {
 				log.Fatal(ok)
 			}
 
-			fmt.Sprintf("%d\t%s\n", size, path)
+			fmt.Printf("%d\t%s\n", size, path)
 
 			return nil
 		},
