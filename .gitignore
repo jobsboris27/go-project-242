@@ -1,2 +1,10 @@
-.DS_Store
 .hidden
+bin/
+*.exe
+*.out
+
+.DS_Store
+._*
+
+.idea/
+.vscode/
