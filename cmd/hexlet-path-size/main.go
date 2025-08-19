@@ -41,7 +41,7 @@ func main() {
 			withHidden := cmd.Bool("all")
 			recursive := cmd.Bool("recursive")
 
-			size, ok := pathsize.GetSize(path, withHidden, recursive)
+			size, ok := pathsize.GetPathSize(path, withHidden, recursive)
 
 			if ok != nil {
 				log.Fatal(ok)
