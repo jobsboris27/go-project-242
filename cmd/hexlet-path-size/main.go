@@ -41,15 +41,13 @@ func main() {
 			withHidden := cmd.Bool("all")
 			recursive := cmd.Bool("recursive")
 
-			size, ok := pathsize.GetPathSize(path, withHidden, recursive)
+			formattedSize, ok := pathsize.GetPathSize(path, recursive, humanReadable, withHidden)
 
 			if ok != nil {
 				log.Fatal(ok)
 			}
 
-			formattedSize := pathsize.FormatSize(size, humanReadable)
-
-			fmt.Printf("%s\t%s\n", formattedSize, path)
+			fmt.Println(formattedSize)
 
 			return nil
 		},

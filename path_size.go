@@ -7,7 +7,17 @@ import (
 	"strings"
 )
 
-func GetPathSize(path string, withHidden bool, recursive bool) (int64, error) {
+func GetPathSize(path string, recursive, human, all bool) (string, error) {
+	size, err := GetSize(path, all, recursive)
+	if err != nil {
+		return "", err
+	}
+
+	formattedSize := FormatSize(size, human)
+	return fmt.Sprintf("%s\t%s", formattedSize, path), nil
+}
+
+func GetSize(path string, withHidden bool, recursive bool) (int64, error) {
 	info, err := os.Lstat(path)
 
 	if err != nil {
