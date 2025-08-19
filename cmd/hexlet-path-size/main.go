@@ -47,7 +47,7 @@ func main() {
 				log.Fatal(ok)
 			}
 
-			fmt.Println(formattedSize)
+			fmt.Printf("%s\t%s\n", formattedSize, path)
 
 			return nil
 		},
