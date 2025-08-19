@@ -1,4 +1,4 @@
-package pathsize_test
+package main_tests
 
 import (
 	pathsize "code"
